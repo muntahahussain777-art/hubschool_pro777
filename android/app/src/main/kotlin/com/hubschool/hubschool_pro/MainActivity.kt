@@ -1,0 +1,5 @@
+package com.hubschool.hubschool_pro
+
+import io.flutter.embedding.android.FlutterFragmentActivity
+
+class MainActivity : FlutterFragmentActivity()
