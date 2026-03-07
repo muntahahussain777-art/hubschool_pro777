@@ -1,0 +1,2 @@
+# Flutter/SPA: serve index.html for all routes so go_router works on refresh/direct URL
+/*    /index.html   200

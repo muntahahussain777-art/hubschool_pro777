@@ -155,13 +155,34 @@ Save karo. Ab web app se login/logout production pe theek kaam karega.
 
 ---
 
-## Part 5: Android App Safe + Supabase Sync
+## Part 5: Admin / Username Login (admin / admin123@)
+
+Website pe **username “admin”** aur **password “admin123@”** se login karne ke liye Supabase me ek user banana zaroori hai:
+
+1. **Supabase Dashboard** → **Authentication** → **Users** → **Add user** → **Create new user**.
+2. **Email:** `admin@hubschool.local`
+3. **Password:** `admin123@`
+4. **User Metadata** (optional but recommended): `{ "role": "admin" }`
+5. Create karo. Ab website pe **Email or Username** field me `admin` aur Password me `admin123@` daal kar Sign in karo.
+
+Agar pehle se **students** table bina `classroom_id`, `monthly_fee`, `previous_school`, `gender` ke banaya tha, to **SQL Editor** me `supabase_migration_students_extra.sql` chala lo (ya naye install me `supabase_schema.sql` me ye columns already hain).
+
+---
+
+## Part 6: Android App Safe + Supabase Sync
 
 - **Android:** Bilkul change nahi. `flutter run` / `flutter build apk` same rehta hai; `lib/main.dart` use hota hai (SQLite/Drift + sync).
 - **Supabase:** Dono (Android + Web) **same project** use karte hain:
   - Android: sync service same tables pe push/pull karega.
   - Web: direct Supabase client se same tables use karegi.
 - **Keys:** `lib/config/supabase_config.dart` dono apps ke liye; production web ke liye optional: build-time `--dart-define=SUPABASE_URL=...` use karo aur code mein `String.fromEnvironment` read karo (optional step).
+
+---
+
+## Part 7: Website Features (Admission CRUD + Reports)
+
+- **Students (Admission):** Admin → **Students** → list dikhegi; **Add Student** se naya admission, row pe **Edit** / **Delete**.
+- **Reports:** Admin → **Reports** → Total Students, Fee Revenue, Expenses, Net; Recent Fee Invoices aur Recent Expenses tables.
 
 ---
 

@@ -1,0 +1,21 @@
+# Netlify config for HubSchool Pro (Flutter web)
+# If deploying via Git: set build command in Netlify UI to:
+#   flutter build web -t lib/main_web.dart --web-renderer html
+# and install Flutter in build environment, then set publish directory: build/web
+# If deploying by drag-drop: upload the contents of build/web as site root.
+
+[build]
+  publish = "build/web"
+
+# SPA: all routes serve index.html so GoRouter works
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Allow Flutter and CanvasKit to load (if using canvaskit renderer)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"

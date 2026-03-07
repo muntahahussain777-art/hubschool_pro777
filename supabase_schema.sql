@@ -38,17 +38,21 @@ CREATE TABLE IF NOT EXISTS classrooms (
 );
 
 CREATE TABLE IF NOT EXISTS students (
-    id            SERIAL PRIMARY KEY,
-    admission_no  TEXT NOT NULL UNIQUE,
-    full_name     TEXT NOT NULL,
-    father_name   TEXT NOT NULL,
-    dob           DATE,
-    phone         TEXT,
-    address       TEXT,
-    photo_path    TEXT,
-    qr_token      TEXT NOT NULL UNIQUE DEFAULT gen_random_uuid()::TEXT,
-    is_active     BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id             SERIAL PRIMARY KEY,
+    admission_no   TEXT NOT NULL UNIQUE,
+    full_name      TEXT NOT NULL,
+    father_name    TEXT NOT NULL,
+    dob            DATE,
+    phone          TEXT,
+    address        TEXT,
+    photo_path     TEXT,
+    qr_token       TEXT NOT NULL UNIQUE DEFAULT gen_random_uuid()::TEXT,
+    classroom_id   INTEGER REFERENCES classrooms(id),
+    monthly_fee    INTEGER NOT NULL DEFAULT 0,
+    previous_school TEXT,
+    gender         TEXT,
+    is_active      BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS enrollments (
@@ -422,6 +426,29 @@ JOIN exams           e  ON e.id  = em.exam_id
 JOIN students        s  ON s.id  = em.student_id
 JOIN exam_components ec ON ec.id = em.component_id
 ORDER BY em.exam_id, s.full_name, ec.name;
+
+-- ─────────────────────────────────────────────
+--  News & Blog
+-- ─────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS news_posts (
+  id           SERIAL PRIMARY KEY,
+  title        TEXT NOT NULL,
+  body         TEXT,
+  type         TEXT NOT NULL DEFAULT 'news',   -- 'news' | 'blog'
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ─────────────────────────────────────────────
+--  App settings (pass %, etc.)
+-- ─────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
 
 -- =============================================================
 --  END OF SCHEMA

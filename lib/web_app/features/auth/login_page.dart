@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/roles.dart';
 
+/// Dual login: Supabase (email + password) OR username "admin" + password "admin123@".
+/// In Supabase Auth create user: email = admin@hubschool.local, password = admin123@,
+/// and set User Metadata: { "role": "admin" }.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -11,14 +14,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailCtrl = TextEditingController();
+  final _emailOrUserCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _loading = false;
+  bool _obscurePassword = true;
   String? _error;
+
+  static const String _adminUsername = 'admin';
+  static const String _adminEmail = 'admin@hubschool.local';
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
+    _emailOrUserCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -29,9 +36,22 @@ class _LoginPageState extends State<LoginPage> {
       _error = null;
     });
     try {
+      final emailOrUser = _emailOrUserCtrl.text.trim();
+      final password = _passCtrl.text;
+
+      String email = emailOrUser;
+      if (!emailOrUser.contains('@')) {
+        if (emailOrUser.toLowerCase() == _adminUsername) {
+          email = _adminEmail;
+        } else {
+          if (mounted) setState(() => _error = 'Use email or username: $_adminUsername');
+          return;
+        }
+      }
+
       await Supabase.instance.client.auth.signInWithPassword(
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
+        email: email,
+        password: password,
       );
       final role = _getRole();
       if (mounted) context.go(role?.dashboardPath ?? '/admin');
@@ -70,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your account',
+                    'Sign in with Email or Username',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -78,11 +98,12 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 32),
                   TextField(
-                    controller: _emailCtrl,
+                    controller: _emailOrUserCtrl,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
+                      labelText: 'Email or Username',
+                      hintText: 'e.g. admin or your@email.com',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email_outlined),
+                      prefixIcon: Icon(Icons.person_outline_rounded),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
@@ -90,12 +111,16 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _passCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Password',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock_outline_rounded),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     onSubmitted: (_) => _login(),
                   ),
                   if (_error != null) ...[

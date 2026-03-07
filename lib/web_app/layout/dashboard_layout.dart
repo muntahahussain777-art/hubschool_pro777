@@ -22,6 +22,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
   Widget build(BuildContext context) {
     final role = _getRole();
     final isNarrow = MediaQuery.of(context).size.width < _breakpoint;
+    final path = GoRouterState.of(context).uri.path;
     return Scaffold(
       key: _scaffoldKey,
       appBar: _AppBar(
@@ -46,12 +47,24 @@ class _DashboardLayoutState extends State<DashboardLayout> {
               onToggle: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
             ),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width < 600 ? 12 : 24,
-                vertical: MediaQuery.of(context).size.width < 600 ? 8 : 16,
-              ),
-              child: widget.child,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1400),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 12 : 24,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                        ),
+                        child: widget.child,
+                      ),
+                    ),
+                  ),
+                ),
+                if (isNarrow && role == AppRole.admin) _BottomNav(path: path, onMoreTap: () => _scaffoldKey.currentState?.openDrawer()),
+              ],
             ),
           ),
         ],
@@ -100,14 +113,18 @@ class _Sidebar extends StatelessWidget {
             onPressed: onToggle,
             icon: Icon(collapsed ? Icons.menu_rounded : Icons.menu_open_rounded),
           ),
-          const SizedBox(height: 16),
-          ...navItems.map((e) => _NavTile(
-                label: e.label,
-                icon: e.icon,
-                path: e.path,
-                collapsed: collapsed,
-              )),
-          const Spacer(),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              itemCount: navItems.length,
+              itemBuilder: (context, i) {
+                final e = navItems[i];
+                return _NavTile(label: e.label, icon: e.icon, path: e.path, collapsed: collapsed);
+              },
+            ),
+          ),
           if (!collapsed)
             Padding(
               padding: const EdgeInsets.all(16),
@@ -143,10 +160,17 @@ class _Sidebar extends StatelessWidget {
           (label: 'Students', icon: Icons.school_rounded, path: '/admin/students'),
           (label: 'Teachers', icon: Icons.badge_rounded, path: '/admin/teachers'),
           (label: 'Classes', icon: Icons.class_rounded, path: '/admin/classes'),
+          (label: 'Subjects', icon: Icons.menu_book_rounded, path: '/admin/subjects'),
           (label: 'Exams', icon: Icons.assignment_rounded, path: '/admin/exams'),
           (label: 'Fees', icon: Icons.payments_rounded, path: '/admin/fees'),
+          (label: 'Fee Heads', icon: Icons.list_alt_rounded, path: '/admin/fee-heads'),
+          (label: 'Expenses', icon: Icons.receipt_long_rounded, path: '/admin/expenses'),
+          (label: 'Staff Attendance', icon: Icons.how_to_reg_rounded, path: '/admin/staff-attendance'),
+          (label: 'Student Attendance', icon: Icons.people_rounded, path: '/admin/student-attendance'),
           (label: 'Reports', icon: Icons.assessment_rounded, path: '/admin/reports'),
-          (label: 'News & Blog', icon: Icons.article_rounded, path: '/admin/news'),
+          (label: 'Blog & News', icon: Icons.article_rounded, path: '/admin/blog'),
+          (label: 'Announcements', icon: Icons.campaign_rounded, path: '/admin/announcements'),
+          (label: 'User Management', icon: Icons.people_rounded, path: '/admin/users'),
           (label: 'Settings', icon: Icons.settings_rounded, path: '/admin/settings'),
         ];
       case AppRole.teacher:
@@ -207,6 +231,41 @@ class _NavTile extends StatelessWidget {
         onTap: () => context.go(path),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
+    );
+  }
+}
+
+class _BottomNav extends StatelessWidget {
+  final String path;
+  final VoidCallback? onMoreTap;
+
+  const _BottomNav({required this.path, this.onMoreTap});
+
+  @override
+  Widget build(BuildContext context) {
+    int selected = 0;
+    if (path.startsWith('/admin/students')) selected = 1;
+    else if (path.startsWith('/admin/fees')) selected = 2;
+    else if (path.startsWith('/admin/exams')) selected = 3;
+    else if (path == '/admin') selected = 0;
+    return NavigationBar(
+      selectedIndex: selected,
+      onDestinationSelected: (i) {
+        switch (i) {
+          case 0: context.go('/admin'); break;
+          case 1: context.go('/admin/students'); break;
+          case 2: context.go('/admin/fees'); break;
+          case 3: context.go('/admin/exams'); break;
+          case 4: onMoreTap?.call(); break;
+        }
+      },
+      destinations: const [
+        NavigationDestination(icon: Icon(Icons.dashboard_rounded), label: 'Home'),
+        NavigationDestination(icon: Icon(Icons.school_rounded), label: 'Students'),
+        NavigationDestination(icon: Icon(Icons.payments_rounded), label: 'Fees'),
+        NavigationDestination(icon: Icon(Icons.assignment_rounded), label: 'Exams'),
+        NavigationDestination(icon: Icon(Icons.menu_rounded), label: 'More'),
+      ],
     );
   }
 }

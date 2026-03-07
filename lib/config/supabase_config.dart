@@ -43,4 +43,15 @@ class SupabaseConfig {
   static const String tExpenseCategories   = 'expense_categories';
   static const String tExpenses            = 'expenses';
   static const String tSyncQueue           = 'sync_queue';
+  static const String tSubjects           = 'subjects';
+  static const String tTeacherAssignments  = 'teacher_assignments';
+  static const String tNewsPosts           = 'news_posts';
+  static const String tStudentAttendance   = 'student_attendance';
+  static const String tAppSettings         = 'app_settings';
+  static const String tAppUserProfiles     = 'app_user_profiles';
+  static const String tBlogPosts           = 'blog_posts';
+  static const String tAnnouncements       = 'announcements';
+
+  /// Storage bucket for blog cover images (create in Dashboard if missing)
+  static const String storageBlogCovers    = 'blog-covers';
 }
