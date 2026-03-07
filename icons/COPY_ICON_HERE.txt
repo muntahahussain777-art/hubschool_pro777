@@ -1,0 +1,1 @@
+Copy hubschoolpro.png from project assets/icons/hubschoolpro.png to this folder (web/icons/hubschoolpro.png) so the browser tab shows the HubSchool Pro icon.
